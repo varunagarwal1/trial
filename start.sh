@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 set -e
+echo ">>> build.sh: creating venv and installing Python dependencies"
 
-# Activate the venv created at build time
+# create the venv
+python3 -m venv .venv
+
+# activate venv
 . .venv/bin/activate
 
-echo "Using Python from: $(which python)"
-python --version
-pip list
+# upgrade pip and tools, then install requirements
+echo ">>> Upgrading pip, setuptools, wheel"
+python -m pip install --upgrade pip setuptools wheel
 
-# Start Odoo using the venv python
-exec python /opt/odoo/odoo-bin -c /etc/odoo/odoo.conf
+echo ">>> Installing requirements from requirements.txt"
+python -m pip install -r requirements.txt --no-cache-dir
+
+# show which python was used and where site-packages live
+echo ">>> venv information"
+echo "VENV python: $(which python)"
+python -V
+python -c "import sysconfig; print('SITE_PACKAGES=' + sysconfig.get_path('purelib'))"
+
+echo ">>> build.sh: finished"
